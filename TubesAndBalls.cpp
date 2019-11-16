@@ -141,7 +141,7 @@ unordered_map<int, Tube*> ReadConfigFile(string fName)
 			int ToPos = stoi(BasicConfig[3]);
 			BasicConfig.clear();
 
-			auto AuxTube = Result[TubeID];
+			Tube *AuxTube = Result[TubeID];
 			AuxTube->PosToTube[From] = pair<Tube*, int>(Result[ToTube], ToPos);
 		}
 	}

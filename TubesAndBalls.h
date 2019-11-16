@@ -7,6 +7,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <algorithm>
+#include <thread>
 
 namespace Files
 {
