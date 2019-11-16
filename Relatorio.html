@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>A Fantástica Máquina de Tubos e Bolinhas do Enigmático Senhor Sibério</title>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="a-fant%c3%a1stica-m%c3%a1quina-de-tubos-e-bolinhas-do-enigm%c3%a1tico-senhor-sib%c3%a9rio">A Fantástica Máquina de Tubos e Bolinhas do Enigmático Senhor Sibério</h1>
+<ul>
+<li><a href="#a-fant%c3%a1stica-m%c3%a1quina-de-tubos-e-bolinhas-do-enigm%c3%a1tico-senhor-sib%c3%a9rio">A Fantástica Máquina de Tubos e Bolinhas do Enigmático Senhor Sibério</a>
+<ul>
+<li><a href="#rodando-o-programa">Rodando o programa</a></li>
+<li><a href="#um-pouco-sobre-o-programa">Um pouco sobre o programa</a></li>
+<li><a href="#modelando-o-problema">Modelando o problema</a></li>
+<li><a href="#resolvendo-o-problema">Resolvendo o problema</a></li>
+<li><a href="#resultados-dos-casos-de-teste">Resultados dos casos de teste</a></li>
+</ul>
+</li>
+</ul>
+<p>Este projeto visa responder a seguinte pergunta:</p>
+<blockquote>
+<p>Quando uma bolinha é jogada em cada um dos canos, qual o número de bolinhas que sairão em cada um dos canos? Qual o cano por onde saem mais bolinhas?</p>
+</blockquote>
+<h2 id="rodando-o-programa">Rodando o programa</h2>
+<p>Este projeto contém um arquivo <em>Makefile</em>, facilitando a compilação.</p>
+<p>Para compilar, basta digitar <code>make</code> em um simulador de terminal. Para rodar o programa, basta digitar <code>./TubesAndBalls</code> (em Windows, <code>.\TubesAndBalls.exe</code>).</p>
+<h2 id="um-pouco-sobre-o-programa">Um pouco sobre o programa</h2>
+<p>Este programa é munido de uma básica interface de interação com o usuário, dada por meio de uma estrutura chamada <code>Log</code>. Essa estrutura contém métodos para imprimir menus na tela e serve como auxiliar para impressão de mensagens mais verbosas para que o usuário não tenha que recompilar o código para que sejam exibidas mensagens mais verbosas.
+A <code>struct Log</code> possui uma variável global chamada de <code>Screen</code> e um membro booleano que representa sua verbosidade. Sempre que esse membro é verdadeiro, todas as chamadas do método <code>Info()</code> imprimirão suas mensagens na tela. Para mudar o nível de verbosidade do programa é preciso entrar em Opções e dar <em>Enable</em> ou <em>Disable</em> na verbosidade dependendo de sua vontade.</p>
+<h2 id="modelando-o-problema">Modelando o problema</h2>
+<p>O problema dos tubos foi modelado de maneira relativamente simples. Cada tubo pertence à classe <code>Tube</code> e contém um dicionário (<code>std::unordered_map</code>) de posições para um par (<code>std::pair</code>) de <code>Tube*</code> e <code>int</code>, onde o primeiro membro do par é o tubo destinatário e o segundo é a posição no tubo destinatário onde a bolinha redirecionada.
+Além disso, cada <code>Tube</code> possui um identificador único e um tamanho ou comprimento.</p>
+<h2 id="resolvendo-o-problema">Resolvendo o problema</h2>
+<p>Ao rodar o programa, uma mensagem de seleção de arquivo é exibida pedindo para que o usuário selecione um arquivo de teste. Esses arquivos estão na pasta <code>./data/</code> e são simples arquivos texto com as configurações da máquina, como especificada no enunciado do problema. Caso o usuário entre com um arquivo que não existe, o programa exibe uma mensagem de erro e termina sua execução. Do contrário, o programa carrega as configurações utilizando um <code>tokenizer</code>, que é um método que recebe uma linha e um delimitador, <code>string</code> e <code>char</code> respectivamente, e retorna um <code>std::vector</code> que representa a <code>string</code> dividida em cada ocorrência do delimitador.
+Os tubos são configurados na mesma rotina de leitura do arquivo de configuração (<code>ReadConfigFile</code>).</p>
+<p>O método <code>FindMostCommonEnding</code> calcula a saída mais comum do sistema (o tubo onde saem mais bolinhas).</p>
+<pre><code class="language-c++"><div><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">FindMostCommonEnding</span><span class="hljs-params">(<span class="hljs-built_in">unordered_map</span>&lt;<span class="hljs-keyword">int</span>, Tube*&gt; SiberiusMachine)</span>
+</span>{
+    <span class="hljs-comment">// First: Tube ID</span>
+    <span class="hljs-comment">// Second: Number of times a ball ended in this tube</span>
+    <span class="hljs-built_in">unordered_map</span>&lt;<span class="hljs-keyword">int</span>, <span class="hljs-keyword">int</span>&gt; endings;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp;&amp; IDToTube : SiberiusMachine)
+    {
+        ++endings[RollBall(IDToTube.second)];
+    }
+
+    <span class="hljs-keyword">auto</span> min = *min_element(endings.begin(), endings.end(),
+        [](pair&lt;<span class="hljs-keyword">int</span>, <span class="hljs-keyword">int</span>&gt; a, pair&lt;<span class="hljs-keyword">int</span>, <span class="hljs-keyword">int</span>&gt; b) {
+            <span class="hljs-keyword">return</span> a.second &gt; b.second;
+        }
+    );
+
+    Screen.Show(<span class="hljs-string">"The tube in which most balls ended is tube "</span> + to_string(min.first) + <span class="hljs-string">", with a total of "</span> + to_string(min.second) + <span class="hljs-string">" balls.\n"</span>);
+}
+</div></code></pre>
+<p>Nesse método temos um dicionário de finais do tipo <code>&lt;int, int&gt;</code>, onde o primeiro valor representa o ID de um tubo e o segundo valor representa a quantidade de bolinhas que saíram por aquele tubo.
+O primeiro <code>for</code> itera pela máquina do Sr. Sibério (um mapa com todos os tubos e seus IDs) e calcula a saída de cada tubo utilizando o método <code>RollBall</code>, cuja saída (o ID do tubo resultante) é a chave do dicionário <code>endings</code>, cujo valor é pré-incrementado.
+Após esse laço, a variável <code>min</code> recebe o mínimo elemento do mapa <code>endings</code>, dado por uma função lambda - que compara o número de vezes que uma bolinha terminou em um tubo - descrita na própria chamada da função <code>min_element</code>. <code>min</code> é do tipo <code>std::pair&lt;int, int&gt;</code>, onde o primeiro valor é o ID de um tubo e o segundo valor é a quantidade de vezes que uma bolinha saiu por aquele tubo.</p>
+<p>O método <code>RollBall</code> recebe um tubo e calcula onde que uma bolinha sairá quando inserida nesse tubo. O valor de retorno é o ID do tubo resultante.</p>
+<pre><code class="language-c++"><div><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">RollBall</span><span class="hljs-params">(Tube* tube)</span>
+</span>{
+    <span class="hljs-keyword">int</span> TubeSize = tube-&gt;TubeSize(), originalID = tube-&gt;ID;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt;= TubeSize; ++i)
+    {
+        Screen.Info(<span class="hljs-string">"Tube ["</span> + to_string(tube-&gt;ID) + <span class="hljs-string">"]: "</span> + to_string(i));
+        <span class="hljs-keyword">if</span> (tube-&gt;PosToTube.find(i) != tube-&gt;PosToTube.end())
+        {
+            <span class="hljs-keyword">int</span> oldID = tube-&gt;ID;
+            <span class="hljs-keyword">auto</span> newTubePair = tube-&gt;PosToTube[i];
+            tube = newTubePair.first;
+            i = --newTubePair.second;
+            Screen.Info(<span class="hljs-string">"Tube "</span> + to_string(oldID) + <span class="hljs-string">" on position "</span> + to_string(i) + <span class="hljs-string">": "</span> + <span class="hljs-string">"Redirecting to tube "</span> + to_string(tube-&gt;ID));
+        }
+    }
+
+    Screen.Info(<span class="hljs-string">"Tube "</span> + to_string(originalID) + <span class="hljs-string">": Ball ended on tube "</span> + to_string(tube-&gt;ID) + <span class="hljs-string">"."</span>);
+    <span class="hljs-keyword">return</span> tube-&gt;ID;
+}
+</div></code></pre>
+<h2 id="resultados-dos-casos-de-teste">Resultados dos casos de teste</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Caso de Teste</th>
+<th style="text-align:center">Número de Tubos</th>
+<th style="text-align:center">Tubo Mais Comum</th>
+<th style="text-align:center">Número de Bolinhas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">20</td>
+<td style="text-align:center">7</td>
+<td style="text-align:center">5</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">50</td>
+<td style="text-align:center">9</td>
+<td style="text-align:center">13</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:center">100</td>
+<td style="text-align:center">86</td>
+<td style="text-align:center">36</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td style="text-align:center">200</td>
+<td style="text-align:center">149</td>
+<td style="text-align:center">86</td>
+</tr>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:center">500</td>
+<td style="text-align:center">211</td>
+<td style="text-align:center">192</td>
+</tr>
+<tr>
+<td style="text-align:center">6</td>
+<td style="text-align:center">1000</td>
+<td style="text-align:center">130</td>
+<td style="text-align:center">365</td>
+</tr>
+<tr>
+<td style="text-align:center">7</td>
+<td style="text-align:center">2000</td>
+<td style="text-align:center">811</td>
+<td style="text-align:center">710</td>
+</tr>
+<tr>
+<td style="text-align:center">8</td>
+<td style="text-align:center">5000</td>
+<td style="text-align:center">4754</td>
+<td style="text-align:center">917</td>
+</tr>
+</tbody>
+</table>
+<p>Em cada caso de teste, o programa executou e retornou o tubo que saíam mais bolinhas, com o número de bolinhas que saíram naquele tubo na coluna ao lado na tabela.</p>
+<p>No caso de teste 8, com 5000 tubos, o tubo mais comum é o tubo 4754, com um total de 917 bolinhas saindo por esse tubo.</p>
+
+    </body>
+    </html>
